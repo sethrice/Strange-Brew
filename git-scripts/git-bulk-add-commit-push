@@ -1,0 +1,58 @@
+#!/bin/bash
+# Remove deleted files from tracking list, commit, and push to remote
+#here=$(pwd)
+#UPDATED=$(git status | grep -Ei '(modified|new file)' | awk -F ': ' '{print $2}' | awk '{print "\""$0"\""}' | sed 's/"  /"/' | tr ' ' '\ ' | awk '{print $0}')
+UPDATED=$(git status | grep -Ei '(modified|new file)' | awk -F ': ' '{print $2}' | awk '{print "\""$0"\""}' | sed 's/"  /"/' | sed 's/ /\\\ /g' | tr -d '"' | awk '{print $0}')
+UNTRACKED=$(git status | grep -vEi '(modified|new file|On branch|Your branch|Untracked files|committed|working tree clean)' | awk -F ' ' '{print $NF}' | tr -d ' ' | sed -e '/^$/d' | grep -vE '(#|:)')
+
+function UPDATE_IT {
+#  cd "$here"
+  git add $UPDATED
+  if [ -z "$1" ] ; then
+    COMMENT='Updating files'
+  else
+    COMMENT="$1"
+  fi
+  echo "Committing with commment: $COMMENT"
+  git commit -m "$COMMENT"
+  git push
+  git pull --all -v
+}
+
+function TRACK_IT {
+  #cd "$here"
+  git add $UNTRACKED
+  if [ -z "$1" ] ; then
+    COMMENT='Adding files'
+  else
+    COMMENT="$1"
+  fi
+  echo "Committing with commment: $COMMENT"
+  git commit -m "$COMMENT"
+  git push
+  git pull --all -v
+}
+
+git status
+if [ -z "$UPDATED" ] ; then
+  echo
+  echo "--- No Modified Tracked Files found ---"
+  sleep 1
+else
+  echo "--- Adding Modified Tracked Files ---"
+  UPDATE_IT "$1"
+  echo
+  sleep 1
+fi
+if [ -z "$UNTRACKED" ] ; then
+  echo "--- No New Untracked Files found ---"
+  echo
+  sleep 1
+else
+  echo "--- Adding New Untracked Files ---"
+  TRACK_IT "$1"
+  echo
+  sleep 1
+fi
+git status
+exit

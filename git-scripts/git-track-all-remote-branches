@@ -1,0 +1,39 @@
+#!/bin/bash
+# Track all remote branches locally
+git branch -a | grep -Eiv '(HEAD|master|main)' | perl -ne 'chomp($_); s|^\*?\s*||; if (m|(.+)/(.+)| && not $d{$2}) {print qq(git branch --track $2 $1/$2\n)} else {$d{$_}=1}' | csh -xfs
+
+#for i in $(git branch -a |grep 'remotes' | awk -F/ '{print $3}' | grep -v 'HEAD ->');do git checkout -b $i --track origin/$i; done
+#for i in $(git branch -a |grep 'remotes' | grep -v 'HEAD ->');do basename ${i##\./} | xargs -I {} git checkout -b {} --track origin/{}; done
+
+# See what isn't merged on remote
+# git branch -r --no-merged
+
+# See what is tracked, what is remote and not local, and what is local
+# git remote show origin
+
+# Clean up deleted branches
+# git remote prune origin
+
+# Check if a path has been given. If not just run against the current working directory
+if [ ${#@} != 1 ]; then
+  git pull --all -v
+else
+  # Since a path was given, check for trailing slash to determine if it should check multiple or single git repo paths.
+  determine=$(echo $1 | grep -Ei '.+\/[a-z,0-9._-]+$')
+
+  if [[ $determine ]] ; then
+  	echo $1
+  	cd $1
+  	git pull --all -v
+  	exit
+  else
+  	for i in `ls $1 | grep -ivE "(modules)"`; do
+  		echo $1$i;
+  		cd $1$i;
+  		git pull --all -v;
+  		cd ..;
+  		echo ;
+  	done
+  fi
+fi
+# Pull all new updates

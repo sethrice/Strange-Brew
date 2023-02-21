@@ -1,0 +1,57 @@
+#!/bin/bash
+##################################################################################################
+# Git Check Current Working Branch v 1.1
+#
+# Written 10/28/2015 by Seth (DrumLordJr) Rice
+# King of the Ricepad - sethrice@gmail.com
+#
+##################################################################################################
+# Things to add:
+#
+# Change Log:
+# 10/28/15 - 1.0 - Created
+# 12/08/15 - 1.1 - Add functionality to specify check against single specific git path by leaving
+#		   out the '/' at the end of the path declaired.
+#
+##################################################################################################
+#
+# Show Options for Usage
+if [ ${#@} != 1 ]; then
+  echo "==========================================================================================="
+  echo "  Usage: $0 <local-git-path>"
+  echo
+  echo "    <local-git-path>      Local GIT repo path"
+  echo
+  echo " Example:       for all git repo's in path "
+  echo "			  $0 '/opt/GIT-WORKING/puppet/' "
+  echo "                          $0 '/opt/GIT-WORKING/puppet/modules/' "
+  echo "		or for a single specified repo, leave off trailing slash "
+  echo "			  $0 '/opt/GIT-WORKING/puppet/puppet-src' "
+  echo
+  echo
+  echo " Summary:"
+  echo " Show current active git branch -v for all specified working git repo subdirectories"
+  echo " Or for specified directory git repo by leaving off the trailing slash"
+  echo
+  echo "==========================================================================================="
+  echo
+  exit
+fi
+
+# Check for trailing slash to determine if it should check multiple or single git repo paths.
+determine=$(echo $1 | grep -Ei '.+\/[a-z,0-9._-]+$')
+
+if [[ $determine ]] ; then
+	echo $1
+	cd $1
+	git branch -v
+	exit
+else
+	for i in `ls $1 | grep -ivE "(modules)"`; do
+		echo $1$i;
+		cd $1$i;
+		git branch -v;
+		cd ..;
+		echo ;
+	done
+fi

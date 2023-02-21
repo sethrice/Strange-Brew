@@ -1,0 +1,64 @@
+#!/bin/bash
+##################################################################################################
+# Git search branch logs Working Git Repo v 1.1
+#
+# Written 03/10/2016 by Seth (DrumLordJr) Rice
+# King of the Ricepad - sethrice@gmail.com
+#
+##################################################################################################
+# Things to add:
+#
+# Change Log:
+# 03/10/16 - 1.0 - Created
+#
+##################################################################################################
+#
+# Show Options for Usage
+if [ ${#@} != 3 ]; then
+  echo "==========================================================================================="
+  echo "  Usage: $0 <local-git-path> <branch-name> <search-content>"
+  echo
+  echo "    <local-git-path>      Local GIT repo path"
+  echo "    <branch-name>         Branch name you wish to search logs of"
+  echo "    <search-content>	  Word you want to search by"
+  echo
+  echo " Example:                 $0 '/opt/GIT-WORKING/puppet/' 'srice_OPERATIONS_12' 'ldap' "
+  echo
+  echo " Summary:"
+  echo " Search git logs for content related to something you might want a history of."
+  echo " Allows you to pull git show logs of all commits related to a specific word."
+  echo " This can be used to find all comits related to LDAP for the audit team to review "
+  echo " LDAP related commits."
+  echo
+  echo "==========================================================================================="
+  echo
+  exit
+fi
+
+rm -f /tmp/matching-logs /tmp/matching-hash /tmp/matching-diff-$3
+
+cd $1
+git checkout $2
+echo
+echo "Searching Branch ' $2 ' for commits related to ' $3 '"
+echo
+for i in `git log -S"$3" --since=1.years --pretty=format:"%H"`;
+	do
+	  echo $i >> /tmp/matching-logs;
+	  echo -n $i ;
+	  git show $i | grep 'Date: ' | cut -d":" -f2-5;
+	done
+echo
+# Removing Duplicate Commit Hash's
+echo
+cat /tmp/matching-logs | grep -iv binary | cut -d':' -f1 | sort -u > /tmp/matching-hash
+hashcount=`cat /tmp/matching-hash | wc -l`
+echo "Gathering 'git show' details for...$hashcount hashs"
+echo
+for i in `cat /tmp/matching-hash`;
+	do
+	  git show $i >> /tmp/matching-diff-$3 ;
+	done
+echo "File is available in /tmp/matching-diff-$3"
+echo
+exit

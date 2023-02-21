@@ -1,0 +1,76 @@
+#!/bin/bash
+##################################################################################################
+# Git Delete branch to Working Git Repo v 1.1
+#
+# Written 10/28/2015 by Seth (DrumLordJr) Rice
+# King of the Ricepad - sethrice@gmail.com
+#
+##################################################################################################
+# Things to add:
+#
+# Change Log:
+# 10/28/15 - 1.0 - Created
+# 12/08/15 - 1.1 - Add functionality to specify check against single specific git path by leaving
+#		   out the '/' at the end of the path declaired.
+#
+##################################################################################################
+#
+# Show Options for Usage
+if [ ${#@} != 2 ]; then
+  echo "==========================================================================================="
+  echo "  Usage: $0 <local-git-path> <branch-name> "
+  echo
+  echo "    <local-git-path>      Local GIT repo path"
+  echo "    <branch-name>         Branch name you wish to delete"
+  echo
+  echo " Example:                 $0 '/opt/GIT-WORKING/puppet/' 'srice_OPERATIONS_12' "
+  echo "                          $0 '/opt/GIT-WORKING/puppet/modules/' 'srice_OPERATIONS_12' "
+  echo "		or for a single specified repo, leave off trailing slash "
+  echo "			  $0 '/opt/GIT-WORKING/puppet/puppet-src' 'srice_OPERATIONS_12' "
+  echo
+  echo " Summary:"
+  echo " Delete desired branch from all git repo working subdirectories specified"
+  echo " Or for specified directory git repo by leaving off the trailing slash"
+  echo
+  echo "==========================================================================================="
+  echo
+  exit
+fi
+
+echo "Deleting branch $2"
+
+# Check for trailing slash to determine if it should check multiple or single git repo paths.
+determine=$(echo $1 | grep -Ei '.+\/[a-z,0-9._-]+$')
+protect1='production'
+protect2='main'
+protect3='master'
+
+if [[ $determine ]] ; then
+	echo $1
+	cd $1
+	git branch -D $2
+	  if [[ $2 = $protect1 || $2 = $protect2 || $2 = $protect3 ]] ; then
+		echo "This is a protected Branch and will only be removed locally"
+		echo "You can pull the branch from the server with 'git checkout -b $2 origin/$2'"
+	  else
+		git branch -dr origin/$2
+		git push origin :$2
+	  fi
+
+	exit
+else
+	for i in `ls $1 | grep -ivE "(modules)"`; do
+		echo $1$i;
+		cd $1$i;
+		git branch -D $2;
+	          if [[ $2 = $protect1 || $2 = $protect2 || $2 = $protect3 ]] ; then
+        	        echo "This is a protected Branch and will only be removed locally"
+           		echo "You can pull the branch from the server with 'git checkout -b $2 origin/$2'"
+	          else
+			git branch -dr origin/$2;
+			git push origin :$2;
+		  fi
+		cd ..;
+		echo ;
+	done
+fi

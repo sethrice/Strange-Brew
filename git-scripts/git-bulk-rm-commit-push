@@ -1,0 +1,28 @@
+#!/bin/bash
+# Remove deleted files from tracking list, commit, and push to remote
+DELETED=$(git status | grep -Ei '(deleted)' | awk -F ': ' '{print $2}' | tr -d ' ')
+
+function CLEAN_IT {
+  git rm -f $DELETED
+  if [ -z "$1" ] ; then
+    COMMENT='Removing files no longer needed'
+  else
+    COMMENT=$1
+  fi
+  git commit -m "$COMMENT"
+  git push
+  git pull --all -v
+  git status
+}
+
+if [ -z "$DELETED" ] ; then
+  git status
+  echo
+  echo "--- No Deleted files found ---"
+  echo "    --- Exiting Script ---"
+  echo
+  sleep 1
+  exit
+else
+  CLEAN_IT "$1"
+fi

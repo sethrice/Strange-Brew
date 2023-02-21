@@ -1,0 +1,14 @@
+#!/bin/sh
+
+# Rename every file from LIVE to GEN
+for f in *SEC660A* ; do mv -f "$f" "$(echo \"$f\" | sed 's/LIVE/GEN/g' | sed 's/"//g')" ; done
+
+# Rename files referenced in vmx
+sed -i 's/LIVE/GEN/g' *.vmx*
+
+# Remove UUID and MAC created on VM startup
+sed -i '/uuid.location/d' *.vmx*
+sed -i '/uuid.bios/d' *.vmx*
+sed -i '/vc.uuid/d' *.vmx*
+sed -i '/ethernet0.generatedAddress/d' *.vmx*
+sed -i '/ethernet1.generatedAddress/d' *.vmx*

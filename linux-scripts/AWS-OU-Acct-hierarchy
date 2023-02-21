@@ -1,0 +1,67 @@
+#!/bin/bash
+
+AWS_PROFILE=$1
+echo
+
+##########
+FILE_ROOTOU="$HOME/Downloads/aws-hierarchy_root-OU.json"
+FILE_OU="$HOME/Downloads/aws-hierarchy_OUs.json"
+FILE_CHILDOU="$HOME/Downloads/aws-hierarchy_root-child-OUs.json"
+FILE_TARGET="$HOME/Downloads/aws-hierarchy_OUs_accounts_target.json"
+FILE_ACCTS="$HOME/Downloads/aws-hierarchy_OUs_accounts.json"
+FILE_ACCTS1="$HOME/Downloads/aws-hierarchy_OUs_accounts1.json"
+##########
+echo -n "Gathering Root OU Information ..."
+aws organizations list-roots > "$FILE_ROOTOU" && echo "Complete" || $(echo "FAILED" ; exit)
+echo
+
+PARENT_ID=$(jq '.Roots[].Id' ~/Downloads/aws-hierarchy_root-OU.json | tr -d '"')
+
+echo -n "Gathering Information on all OU's ..."
+aws organizations list-organizational-units-for-parent --parent-id $PARENT_ID > "$FILE_OU" && echo "Complete" || $(echo "FAILED" ; exit)
+echo
+
+echo -n "Gathering Root Child OU Information ..."
+aws organizations list-children --parent-id $PARENT_ID --child-type ORGANIZATIONAL_UNIT > "$FILE_CHILDOU" && echo "Complete" || $(echo "FAILED" ; exit)
+echo
+
+jq -r '[.OrganizationalUnits[].Id]' "$FILE_OU" | sed 's/^[][]*$//g' | sed '/^[[:space:]]*$/d' | tr -d '", ' > ~/Downloads/aws-hierarchy_ou_ids
+OU_IDS=$(awk '{print $0}' ~/Downloads/aws-hierarchy_ou_ids)
+cp ~/Downloads/aws-hierarchy_OUs.json ~/Downloads/aws-hierarchy_OUs_accounts.json
+
+sleep .5
+for i in $OU_IDS ;
+    do echo
+
+    ##########
+    FILE_OU="$HOME/Downloads/aws-hierarchy_accounts-in-ou_$i.json"
+
+
+    ##########
+    echo -n "Gathering Account Information from OU: $i ..."
+    aws organizations list-accounts-for-parent --parent-id "$i" > "$FILE_OU" && echo "Complete" || $(echo "FAILED" ; exit)
+    sleep .5
+
+    function CONTENT {
+        awk '{print $0}' "$1"
+    }
+    content=$(CONTENT "$FILE_OU")
+    echo -n "Merging Account Information Under OU $i ..."
+    #jq --arg i "$i" --argjson content "$content" '.OrganizationalUnits[] | select (.Id | contains($i)) += $content' ~/Downloads/aws-hierarchy_OUs_accounts.json > ~/Downloads/aws-hierarchy_OUs_accounts1.json && echo "Complete" || $(echo "FAILED" ; exit)
+
+    #function TARGET {
+        jq --arg i "$i" '.OrganizationalUnits[] | select (.Id | contains($i))' "$FILE_ACCTS" > "$FILE_TARGET"
+    #}
+    #target=$(TARGET)
+    #$target > $FILE_TARGET
+    jq --arg i "$i" --argjson content "$content" '.OrganizationalUnits[] | select (.Id | contains($i)) | . + $content' "$FILE_ACCTS" > "$FILE_ACCTS1" && echo "Complete" || $(echo "FAILED" ; exit)
+    sleep .5
+    #$(sed -i "s|$(cat $FILE_TARGET)|$(cat $FILE_ACCTS1)|" "$FILE_ACCTS")
+    filetarget=$(CONTENT "$FILE_TARGET")
+    fileaccts1=$(CONTENT "$FILE_ACCTS1")
+    jq --argjson filetarget "$filetarget" --argjson fileaccts1 "$fileaccts1" '.OrganizationalUnits[] | select (.Id | contains($filetarget)) | .+ $fileaccts1' "$FILE_ACCTS" > "$FILE_ACCTS".2
+    sleep 1
+done
+
+
+

@@ -1,0 +1,70 @@
+#!/bin/bash
+
+TARGETDIR="DFIR"
+BASEREPO="sans-dfir"
+REPOARCH="github"
+#REPOARCH="bitbucket"
+GHUSER="sethrice"
+BBUSER="DrumLordJr"
+
+
+cd ~/GIT-CLONE/$TARGETDIR
+
+if [ "$REPOARCH" = "github" ] ; then
+	# Using Github based Syntax and Search Parameters
+	BASEREPOURL="https://github.com/$BASEREPO"
+	BASEURL="https://$GHUSER@github.com/$BASEREPO"
+	KEY='itemprop="name codeRepository"'
+	# Get Child Repo list with scrape
+	curl -o "project-$BASEREPO" "$BASEREPOURL"
+
+
+elif [ "$REPOARCH" = "bitbucket" ] ; then
+	# Using Bitbucket based Syntax and Search Parameters
+	BASEREPOURL="https://bitbucket.org/account/user/$BASEREPO"
+	BASEURL="https://$BBUSER@bitbucket.org"
+	KEY="'(repo-list--repo-name)'"
+	# Get Child Repo list with scrape
+	curl -O https://bitbucket.org/"$BASEREPO"/profile/projects
+	# Establish Project to search by
+	PROJECTS=$(grep -E "a href=\"/account/user/$BASEREPO/projects/" projects | awk -F 'href="' '{print $2}' | awk -F '"' '{print $1}')
+	for i in "$PROJECTS"
+	 	do
+		curl -o "project-$i" "$BASEREPOURL/projects/$i"
+		for page in `grep -E '(page-number-link)' $i | awk -F 'href="' '{print $2}' | awk -F '"' '{print $1}' | awk -F '/' '{print $NF}'`
+			do
+			curl -o "project-$page" "$BASEREPOURL/projects/$page"
+			done
+		done
+else
+		echo "ERROR - Exiting"
+		exit
+fi
+
+grep -E "$KEY" project-* | awk -F 'href="' '{print $2}' | awk -F '"' '{print $1}' > repolist
+
+for i in `cat repolist`
+	do
+	repo=$(echo $i | awk -F '/' '{print $NF}')
+	function horde() {
+		git branch -a | grep -Eiv '(HEAD|master)' | perl -ne 'chomp($_); s|^\*?\s*||; if (m|(.+)/(.+)| && not $d{$2}) {print qq(git branch --track $2 $1/$2\n)} else {$d{$_}=1}' | csh -xf ; git pull --all
+	}
+
+	if [ -d "$repo" ] ; then
+		echo "$repo directory already exists, pulling latest updates"
+		cd $repo
+		echo $repo
+		horde
+		cd ..
+		echo
+	else
+		echo "$repo directory does not exist, cloning repo to local system"
+		git clone $BASEURL/$repo.git
+		cd $repo
+		echo $repo
+		horde
+		cd ..
+		echo
+	fi
+
+	done

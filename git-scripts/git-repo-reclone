@@ -1,0 +1,22 @@
+#!/bin/bash
+
+start=$(pwd)
+#basepath="/Users/srice/GIT-CLONE/vmware/pyvmomi"
+basepath="$1"
+repo=$(echo "$basepath" | awk -F '/' '{print $NF}') 
+baseparent=$(echo "$basepath" | awk -F '/' '{$NF="" ; print $0}' | tr ' ' '/')
+
+echo "repo:      $repo"
+echo "basepath:  $baseparent "
+cd "$baseparent"
+
+echo
+echo "Changed to: " ; pwd
+
+url=$(grep url "$repo"/.git/config | awk -F '= ' '{print $2}')
+
+rm -fr "$repo" && git clone "$url"
+
+cd "$start"
+echo
+echo "Changed to: " ;pwd

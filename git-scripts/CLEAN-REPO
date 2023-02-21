@@ -1,0 +1,63 @@
+#!/bin/bash
+##################################################################################################
+# Git Clean Repo v 1.1
+#
+# Written 03/04/2016 by Seth (DrumLordJr) Rice
+# King of the Ricepad - sethrice@gmail.com
+#
+##################################################################################################
+# Things to add:
+#
+# Change Log:
+# 03/03/16 - 1.0 - Created
+#
+##################################################################################################
+#
+# Show Options for Usage
+if [ ${#@} == 0 ]; then
+  echo "==========================================================================================="
+  echo "  Usage: $0 '<local-git-path>' '<filename>'"
+  echo
+  echo "    <local-git-path>      	Local GIT repo path"
+  echo "    <filename>      		File name of file you wish to clean out"
+  echo
+  echo " Example:                 $0 '/opt/GIT-WORKING/Vagrant/' '*.box'"
+  echo
+  echo " Summary:"
+  echo " Clean out large files as referenced by the admin, then clean up repo, and push"
+  echo " to origin."
+  echo
+  echo "==========================================================================================="
+  echo
+  exit
+fi
+
+# Do Work
+echo Change Directory to $1
+cd $1
+echo Current Directory
+pwd
+echo
+echo Clean Up Files and lingering bits
+git filter-branch --force --index-filter "git rm -rf --cached --ignore-unmatch $2" --prune-empty --tag-name-filter cat -- --all
+rm -fr .git/refs/original/
+echo expire some log stuff
+git reflog expire --expire=now --all
+echo
+echo prune some stuff
+git gc --prune=now
+git gc --aggressive --prune=now
+echo
+echo check git status
+git status
+echo
+echo Force a git push
+git push origin --force --all
+git push origin --force --tags
+echo
+#echo do some for-each-ref voodoo
+#git for-each-ref --format='delete %(refname)' refs/original | git update-ref --stdin
+#echo
+echo get git status again
+git status
+echo
