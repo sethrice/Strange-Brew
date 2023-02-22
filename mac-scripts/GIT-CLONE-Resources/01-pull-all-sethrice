@@ -1,0 +1,35 @@
+#!/bin/bash
+whodis=$(whoami)
+# # Run DFIR Updates which dynamically pulls repo list from github
+# cd /Users/$whodis/GIT-CLONE/DFIR
+# echo
+# echo "================================================="
+# echo
+# echo `pwd`
+# /bin/bash updateall
+# echo
+# cd /Users/$whodis/GIT-CLONE/teamdfir
+# echo
+# echo "================================================="
+# echo
+# echo `pwd`
+# /bin/bash updateall
+# echo
+
+# Run git pulls for all repo's and track all branches locally
+cd /Users/$whodis/GIT-CLONE
+echo
+echo "================================================="
+echo
+echo `pwd`
+for i in `awk '{print $0}' repolist-sethrice`; do cd $i ; echo "=================================================" ; echo ; echo `pwd`; /Users/$whodis/GIT-CLONE/sethrice/Strange-Brew/git-scripts/git-track-all-remote-branches ; echo ; echo "=================================================" ; echo; done
+echo
+
+# Backup to external disk
+[ -d "/Volumes/External St/GIT-CLONE" ] && echo "Backing Up to External Disk" && rsync -avp --append --progress "/Users/$whodis/GIT-CLONE/sethrice" "/Volumes/External St/GIT-CLONE/" || echo "Aborting before Backup via rsync. External Disk not visible."
+
+
+# Finished
+echo
+echo "Finished"
+echo

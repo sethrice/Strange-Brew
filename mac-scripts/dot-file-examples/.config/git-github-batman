@@ -1,0 +1,11 @@
+[user]
+	name = Bruce Wayne
+	email = batman@gmail.com
+	#signingkey = xxxxxxxxxxx
+
+[core]
+	sshCommand = "ssh -i /Users/batman/.ssh/id_rsa_git_batman"
+#[gpg]
+#    program = gpg
+#[commit]
+#	gpgsign = true

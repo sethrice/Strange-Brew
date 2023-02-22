@@ -1,0 +1,40 @@
+# This is Git's per-user configuration file.
+[user]
+	name = Bruce Wayne
+	email = batman@gmail.com
+
+[credential]
+	helper = ""
+
+# Include configuration for an identity which will operate within a specific folder
+
+##################################################################
+# Public Repos
+[includeIf "gitdir:/Users/batman/GIT-CLONE/batman/"]
+	path = /Users/batman/.config/git-github-batman
+
+[includeIf "gitdir:/Users/batman/GIT-CLONE/sethrice/"]
+	path = /Users/batman/.config/git-github-batman
+
+##################################################################
+# Work Repos
+[includeIf "gitdir:/Users/batman/GIT-CLONE/work/"]
+	path = /Users/batman/.config/git-github-batman-work
+
+##################################################################
+# Ignore any creds for any repo dir not defined
+[includeIf "gitdir:/Users/batman/"]
+	path = /Users/batman/.config/git-null
+
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+[core]
+	symlinks = false
+
+[alias]
+	olog = log --oneline --decorate --graph
+[pull]
+	rebase = false

@@ -1,0 +1,41 @@
+#!/bin/bash
+
+clear
+thisdir=`pwd`
+cd ~/
+basepath="$1"
+today=`date +"%Y-%m-%d"`
+whodis=`whoami`
+function SINGLETHREAD {
+  while [ $(ps -ef | grep -v grep | grep -Ei '(rsync -avp)' | wc -l) -ge 3 ] ; do date ; echo "waiting for another running job to complete" ; sleep 60 ; done && $@
+}
+
+# Get dot_files
+singlethread=$(SINGLETHREAD $@)
+echo
+echo "================"
+echo "dot files"
+echo "$($singlethread rsync -avp --progress --exclude=".DS_Store" --exclude="*.sock" /Users/$whodis/.{al,ap,aw,b,config,g,l,m,py,ssh,vi,zp,zsh}* $basepath/dot_files/dot_files-$today/)"
+echo
+echo "================"
+echo "Desktop"
+echo "$($singlethread rsync -avp --progress --exclude=".DS_Store" --delete-before /Users/$whodis/Desktop $basepath/)"
+echo
+echo "================"
+echo "Documents"
+echo "$($singlethread rsync -avp --progress --exclude=".DS_Store" --exclude "Virtual Machines" --exclude "WebEx" --exclude "Zoom" --exclude "GoToMeeting Chats" --exclude="*.sock" /Users/$whodis/Documents $basepath/)"
+echo
+echo "================"
+echo "Downloads"
+echo "$($singlethread rsync -avp --progress --exclude=".DS_Store" --delete-before /Users/$whodis/Downloads $basepath/)"
+echo
+echo "================"
+echo "Stuff"
+echo "$($singlethread rsync -avp --progress --exclude=".DS_Store" /Users/$whodis/Stuff $basepath/)"
+echo
+echo "================"
+echo "GIT-CLONE scripts and lists"
+echo "$($singlethread rsync -avp --progress --exclude=".DS_Store" ~/GIT-CLONE/*{pull,list,urls,aquire}* $basepath/GIT-CLONE/)"
+echo "$($singlethread rsync -avp --progress --exclude=".DS_Store" ~/GIT-CLONE/sethrice $basepath/GIT-CLONE/)"
+
+cd "$thisdir"

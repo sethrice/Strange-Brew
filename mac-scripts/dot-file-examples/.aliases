@@ -1,0 +1,88 @@
+### Aliases, aliases everywhere, and info bout them
+
+# I can't for the life of me remember the source command, but still want to relaod my terminal env from time to time
+alias reload-bash='source ~/.bashrc'
+alias reload-zshell='source ~/.zprofile'
+###
+# A lazy, err, efficient way to make sure i'm defaulting to python3 and not python2 like a fool
+alias python="python3"
+###
+# First thing to do each day, to update all the things
+alias goodmorning='ping -c 1 google.com > /dev/null && echo "Comms Connectivity Established..." ; echo "Validating Credentials...." ; sleep 2 ; setup_keys ; sleep 2 ; echo "Gathering Interagency Updates..." ; brew update ; brew upgrade ; op update ; echo "Gathering Updates from HQ..." ; sleep 2 ; ~/GIT-CLONE/00-pull-all ; echo -n "Checkin Complete - "; date; echo "Good Morning Agent Johnson...." ; echo || echo "!! Comms Error !!"'
+###
+# Sneak around web blocking jazz (yeah the ip's are fake, use your own real ones)
+alias batcave-prox='ssh -L 8080:263.538.xxx.xxx:8080 ops@263.538.xxx.xxx'
+###
+# Connect to Natted Windows box via batcave-prox (did you expect real ips? Use your own)
+alias tunnel-rdp='ssh -L 3380:192.168.xxx.xxx:3389 ops@263.538.xxx.xxx'
+###
+# What is my public IP, and do I have more than just the one because of some web proxy?
+alias check-pub-ip="curl -s www.ip-secrets.com | grep -Eo '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}'"
+###
+# Update the inux style mlocatedb thingy from back in the day when I was intimdated by the find command flags
+alias updatedb='sudo /usr/libexec/locate.updatedb'
+###
+# Login to 1Password, switch out 'my' for company subdomain if you have one
+alias login-1pass='eval $(op signin my)'
+###
+# Login to an API or any CLI based auth thing with 1Password, because hard coded creds,
+# and text files with creds are so 2022.
+alias login-api-thing='api-thing login --email $(op get item API-Thing --fields username) --password $(op get item API-Thing --fields password)'
+###
+# Login to AWS Single Signon 'login-sso-aws default'
+# $(login-sso-aws sandbox-batman)
+alias login-sso-aws='aws configure sso --profile'
+###
+# list my dot aws profiles for the login-sso-aws command above, because I slept since
+# I pulled that naming convention out of the air.
+# I could also do 'awsume -l' but didn't know that until early 2023, dont judge me.
+list_aws_profiles() {
+	grep profile ~/.aws/config | awk '{print $NF}' | tr -d '\]' | sort
+}
+###
+# I super don't like having that ssh error that makes me think the sshd service or a firewall is being a jerk,
+# when really I just didn't load my key. So this loads the key for me. The imediate below is what I used for a while.
+##alias setup-keys='ssh-add -K ~/.ssh/id_rsa ; ssh-add -K ~/.ssh/id_rsa_git_batman ; ssh-add -K ~/.ssh/id_rsa_ops ; ssh-add -K ~/.ssh/id_rsa_git_batman'
+# Then I wanted an easier way to read it, update it, and have it work within other aliases. So I did it as a function like this.
+setup_keys() {
+	ssh-add --apple-use-keychain ~/.ssh/id_rsa
+	ssh-add --apple-use-keychain ~/.ssh/id_rsa_git_batman
+	ssh-add --apple-use-keychain ~/.ssh/id_rsa_bitbucket_batman
+	ssh-add --apple-use-keychain ~/.ssh/id_rsa_git_batman_test
+	ssh-add --apple-use-keychain ~/.ssh/id_rsa_test_ec2_root
+	ssh-add --apple-use-keychain ~/.ssh/id_rsa_test_ec2_ubuntu
+	echo "...ssh key setup complete..."
+}
+###
+# When you get a key with a stupid passphrase that you know, or it's absent of one, and you want to make an aswesome new passphrase without loosing the key pair.
+alias change-key-passphrase="ssh-keygen - c-f $1"
+###
+# change the comment of a public key so you can easliy see what user, service, whatever it's for.
+alias change-key-comment="ssh-keygen -c -f $1 -C '$2'"
+###
+# This one doesn't seem to work, gotta figure that out. Currently it just creates files with the line number and flips me the bird,
+# when I want it to perform a targetd strike on a specific line that the offending duplicate key is on. So I don't have to vi
+# the known_hosts file like a chump.
+##alias remove-offending-key="sed '$1d' ~/.ssh/known_hosts | > ~/.ssh/known_hosts"
+###
+# So you horked up the repo? You wanna start over with a fresh clone but don't want to go digging for the URL?
+# I feel ya, no judgements. Run this, as it will lookup that url for you, hold it in it's shirt pocket
+# long enough for the local repo directory to get nuked, then used to clone down the repo from remote to local.
+# Don't look into the fact that this exists means I hork up my local repo a lot, kuz i'm doesn't.
+# Its more for when you make it look like you did all that cool work in a single commit like a boss,
+# and not te 37 commits with messages like 'fixing typo', 'updatez', or 'how did this ever work!?' that it took to get there.
+# Also without all the merge from main messages because it took you way longer than you thought to knock out. 
+alias git-repo-reclone='~/GIT-CLONE/sethrice/Strange-Brew/git-scripts/git-repo-reclone'
+###
+# Why do we still have this branch? UGHHHGHH
+alias git-delete-merged-branches='~/GIT-CLONE/sethrice/Strange-Brew/git-scripts/git-delete-merged-branches $1'
+###
+# What Was that command? The one with from last week with the words 'freebird', that I can't remember the rest of...
+ww() {
+	grep -i "$1" ~/.zsh_history | grep -vi  "ww $1"
+}
+###
+# iTerm2 :shrug: emoji
+function iterm2_print_user_vars() {
+	iterm2_set_user_var gitBranch $((git branch 2> /dev/null) | grep \* | cut -c3-)
+}

@@ -1,0 +1,29 @@
+#!/bin/bash
+whodis=$(whoami)
+repobase="/Users/$whodis/GIT-CLONE"
+list="$repobase/git-urls"
+
+for i in $(cat "$list") ; do
+   projectbase=$(echo "$i" | awk -F ',' '{print $1}')
+   url=$(echo "$i" | awk -F ',' '{print $2}')
+   reponame=$(echo "$url" | awk -F '/' '{print $NF}' | awk -F '.' '{print $1}')
+ #echo "line: $i"
+ #echo "projectbase: $projectbase"
+ #echo "url: $url"
+ #echo "reponame: $reponame"
+   if [ ! -d "$repobase/$projectbase" ] ; then
+      echo "Creating $repobase/$projectbase"
+      mkdir -p "$repobase/$projectbase"
+   fi
+   if [ -f "$repobase/$projectbase/$reponame/.git/config" ] ; then
+      echo "$repobase/$projectbase/$reponame already aquired"
+      sleep 0.5
+   else
+      cd "$repobase/$projectbase"
+      pwd
+      echo "Aquiring $url"
+      git clone "$url"
+      echo
+      sleep 0.5
+   fi
+done
