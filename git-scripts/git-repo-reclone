@@ -15,7 +15,7 @@ echo "Changed to: " ; pwd
 
 url=$(grep url "$repo"/.git/config | awk -F '= ' '{print $2}')
 
-rm -fr "$repo" && git clone "$url"
+rm -fr "$repo" && git clone --recursive "$url"
 
 cd "$start"
 echo

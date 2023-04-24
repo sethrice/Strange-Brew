@@ -24,13 +24,13 @@ else
   if [[ $determine ]] ; then
   	echo $1
   	cd $1
-  	git pull --all -v
+  	git pull --recursive --all -v
   	exit
   else
   	for i in `ls $1 | grep -ivE "(modules)"`; do
   		echo $1$i;
   		cd $1$i;
-  		git pull --all -v;
+  		git pull --recursive --all -v;
   		cd ..;
   		echo ;
   	done
