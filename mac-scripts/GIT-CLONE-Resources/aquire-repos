@@ -22,7 +22,7 @@ for i in $(cat "$list") ; do
       cd "$repobase/$projectbase"
       pwd
       echo "Aquiring $url"
-      git clone "$url"
+      git clone --recursive "$url"
       echo
       sleep 0.5
    fi
