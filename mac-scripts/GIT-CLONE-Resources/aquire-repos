@@ -3,10 +3,12 @@ whodis=$(whoami)
 repobase="/Users/$whodis/GIT-CLONE"
 list="$repobase/git-urls"
 
+# Need to Add check for *.wiki.git repo, and aquire it if it exists. Then append to the git-urls file automatically possibly perhaps why not
+
 for i in $(cat "$list") ; do
-   projectbase=$(echo "$i" | awk -F ',' '{print $1}')
-   url=$(echo "$i" | awk -F ',' '{print $2}')
-   reponame=$(echo "$url" | awk -F '/' '{print $NF}' | awk -F '.' '{print $1}')
+   projectbase=$(echo "$i" | awk -F ':' '{print $2}' | awk -F '/' '{print $1}')
+   url=$(echo "$i" | awk '{print $0}')
+   reponame=$(echo "$url" | awk -F ':' '{print $2}' | awk -F '.git' '{print $1}')
  #echo "line: $i"
  #echo "projectbase: $projectbase"
  #echo "url: $url"
@@ -15,15 +17,13 @@ for i in $(cat "$list") ; do
       echo "Creating $repobase/$projectbase"
       mkdir -p "$repobase/$projectbase"
    fi
-   if [ -f "$repobase/$projectbase/$reponame/.git/config" ] ; then
-      echo "$repobase/$projectbase/$reponame already aquired"
-      sleep 0.5
+   if [ -f "$repobase/$reponame/.git/config" ] ; then
+      echo "$repobase/$reponame already aquired"
    else
       cd "$repobase/$projectbase"
       pwd
       echo "Aquiring $url"
       git clone --recursive "$url"
       echo
-      sleep 0.5
    fi
 done
