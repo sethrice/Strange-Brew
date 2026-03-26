@@ -31,7 +31,8 @@ echo
 echo "================================================="
 echo
 echo `pwd`
-for i in `awk '{print $0}' repolist`; do cd $i ; echo "=================================================" ; echo ; echo `pwd`; /Users/$whodis/GIT-CLONE/sethrice/Strange-Brew/git-scripts/git-track-all-remote-branches ; echo ; echo "=================================================" ; echo; done
+#for i in `awk '{print $0}' repolist`; do cd ~/$i ; echo "=================================================" ; echo ; echo `pwd`; /Users/$whodis/GIT-CLONE/SpringHealth/strange-brew/git-scripts/git-track-all-remote-branches ; echo ; echo "=================================================" ; echo; done
+for i in $(awk -F ':' '{print $2}' git-urls | awk -F '.git' '{print $1}'); do cd /Users/$whodis/GIT-CLONE/$i ; echo "=================================================" ; echo ; echo `pwd`; /Users/$whodis/GIT-CLONE/sethrice/Strange-Brew/git-scripts/git-track-all-remote-branches ; echo ; echo "=================================================" ; echo; done
 echo
 
 # Backup to external disk

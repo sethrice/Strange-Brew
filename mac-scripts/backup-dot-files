@@ -19,23 +19,23 @@ echo "$($singlethread rsync -avp --progress --exclude=".DS_Store" --exclude="*.s
 echo
 echo "================"
 echo "Desktop"
-echo "$($singlethread rsync -avp --progress --exclude=".DS_Store" --delete-before /Users/$whodis/Desktop $basepath/)"
+echo "$($singlethread rsync -avp --progress --exclude=".DS_Store" --delete-before /Users/$whodis/Desktop $basepath/dot_files/dot_files-$today/)"
 echo
 echo "================"
 echo "Documents"
-echo "$($singlethread rsync -avp --progress --exclude=".DS_Store" --exclude "Virtual Machines" --exclude "WebEx" --exclude "Zoom" --exclude "GoToMeeting Chats" --exclude="*.sock" /Users/$whodis/Documents $basepath/)"
+echo "$($singlethread rsync -avp --progress --exclude=".DS_Store" --exclude "Virtual Machines" --exclude "WebEx" --exclude "Zoom" --exclude "GoToMeeting Chats" --exclude="*.sock" /Users/$whodis/Documents $basepath/dot_files/dot_files-$today/)"
 echo
 echo "================"
 echo "Downloads"
-echo "$($singlethread rsync -avp --progress --exclude=".DS_Store" --delete-before /Users/$whodis/Downloads $basepath/)"
+echo "$($singlethread rsync -avp --progress --exclude=".DS_Store" --delete-before /Users/$whodis/Downloads $basepath/dot_files/dot_files-$today/)"
 echo
 echo "================"
 echo "Stuff"
-echo "$($singlethread rsync -avp --progress --exclude=".DS_Store" /Users/$whodis/Stuff $basepath/)"
+echo "$($singlethread rsync -avp --progress --exclude=".DS_Store" /Users/$whodis/Stuff $basepath/dot_files/dot_files-$today/)"
 echo
 echo "================"
 echo "GIT-CLONE scripts and lists"
-echo "$($singlethread rsync -avp --progress --exclude=".DS_Store" ~/GIT-CLONE/*{pull,list,urls,aquire}* $basepath/GIT-CLONE/)"
-echo "$($singlethread rsync -avp --progress --exclude=".DS_Store" ~/GIT-CLONE/sethrice $basepath/GIT-CLONE/)"
+echo "$($singlethread rsync -avp --progress --exclude=".DS_Store" ~/GIT-CLONE/*{pull,list,urls,aquire}* $basepath/dot_files/dot_files-$today/GIT-CLONE/)"
+echo "$($singlethread rsync -avp --progress --exclude=".DS_Store" ~/GIT-CLONE/sethrice $basepath/dot_files/dot_files-$today/GIT-CLONE/)"
 
 cd "$thisdir"
